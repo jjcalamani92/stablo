@@ -1,0 +1,50 @@
+---
+import Container from "../../components/container.astro";
+import Pagetitle from "../../components/pagetitle.astro";
+import Postlist from "../../components/postlist.astro";
+import Layout from "../../layouts/Layout.astro";
+import { latestPosts } from "../../utils/content";
+// Use Astro.glob() to fetch all posts, and then sort them by date.
+// const posts = (await Astro.glob("./blog/*.{md,mdx}")).sort(
+//   (a, b) =>
+//     new Date(b.frontmatter.publishDate).valueOf() -
+//     new Date(a.frontmatter.publishDate).valueOf()
+// );
+import { Page } from "../../interfaces/page";
+import { Category } from "../../interfaces/category";
+import { Article } from "../../interfaces/article";
+import { url, v, uid, type } from "../../utils/const";
+import ListCategories from "../../components/ListCategories.astro";
+import ListArticles from "../../components/ListArticles.astro";
+import ListArticles0 from "@components/ListArticles0.astro";
+
+const params = Astro.params;
+
+const page:Page = await fetch(
+  `${url}/api/${v}/${type}/query/pages/page/${uid}/${params.page}`
+).then((response) => response.json());
+console.log('page', page)
+const categories:Category[] = await fetch(
+  `${url}/api/${v}/${type}/query/categories/0/category/parentId?id=${page._id!}`
+).then((response) => response.json());
+const articles = await fetch(
+  `${url}/api/${v}/${type}/query/articles/article/parentId?id=${page._id!}`
+).then((response) => response.json());
+---
+
+<Layout title="Archive">
+  <Container>
+    <!-- <ListCategories page={page} categories={categories} />
+    <ListArticles page={page} articles={articles} /> -->
+    <Pagetitle>
+      <Fragment slot="title">{page.data.name}</Fragment>
+      <Fragment slot="desc">{page.data.description}</Fragment>
+    </Pagetitle>
+    <main>
+      <div class="grid gap-10 mt-10 lg:gap-10 md:grid-cols-2 xl:grid-cols-3">
+        <!-- {latestPosts.map((post) => <Postlist post={post} aspect="square" />)} -->
+        {articles.map((post) => <ListArticles0 post={post} aspect="square" />)}
+      </div>
+    </main>
+  </Container>
+</Layout>

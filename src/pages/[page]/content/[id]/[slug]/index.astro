@@ -1,0 +1,142 @@
+---
+// export const prerender = true;
+import { marked } from 'marked';
+// import Post from "../../../../../components/Post.astro";
+import Layout from "../../../../../layouts/Layout.astro";
+import { url, v, uid, type } from "../../../../../utils/const";
+import { Article } from '@interfaces/article';
+import Container from '@components/container.astro';
+import { Picture } from '@astrojs/image/components';
+
+// export async function getStaticPaths() {
+//   const articles = await fetch(
+//     `${url}/api/${v}/${type}/query/articles/article/siteId?id=${uid}`
+//     ).then((response) => response.json());
+//   // console.log('articles', articles)
+//     return articles.map((article: any) => ({ params: { page: 'article', id: article._id, slug: article.slug }, props: {article}}));
+// }
+// const { article } = Astro.props;
+const params = Astro.params;
+
+const article:Article = await fetch(
+  `${url}/api/${v}/${type}/query/articles/${params.id}`
+).then((response) => response.json());
+
+const content = marked.parse(article.data.content, {mangle: false, headerIds: false});
+
+---
+<Layout
+  title={article.data.name}
+  desc={article.data.description}
+  ogimage={article.data.thumbnailUrl}>
+  <Container>
+    <div class="max-w-screen-md mx-auto">
+      <!-- <div class="text-center">
+        <Label theme={category.color}>{category.title} </Label>
+      </div> -->
+
+      <h1
+        class="mt-2 mb-3 text-3xl font-semibold tracking-tight text-center lg:leading-snug text-brand-primary lg:text-4xl dark:text-white">
+        {article.data.name}
+      </h1>
+
+      <!-- <div class="flex justify-center mt-3 space-x-3 text-gray-500">
+        <div class="flex items-center gap-3">
+          <div class="relative flex-shrink-0 w-10 h-10">
+            {
+              author.image && (
+                <Image
+                  src={author.image}
+                  alt="Author Photo"
+                  width={80}
+                  height={80}
+                  loading="eager"
+                  class="rounded-full"
+                />
+              )
+            }
+          </div>
+
+          <div>
+            <p class="text-gray-800 dark:text-gray-400">
+              {author.name}
+            </p>
+            <div class="flex items-center space-x-2 text-sm">
+              <time
+                class="text-gray-500 dark:text-gray-400"
+                datetime={post.data.publishDate}>
+                {getFormattedDate(post.data.publishDate)}
+              </time>
+              <span>
+                · {Math.round(remarkPluginFrontmatter?.estReadingTime) || "5"} min
+                read
+              </span>
+            </div>
+          </div>
+        </div>
+      </div> -->
+    </div>
+  </Container>
+
+  <div
+    class="relative z-0 max-w-screen-lg mx-auto overflow-hidden lg:rounded-lg aspect-video">
+    {
+      article.data.thumbnailUrl && (
+        <Picture
+          src={article.data.thumbnailUrl}
+          widths={[200, 400, 800]}
+          sizes="(max-width: 640px) 90vw, 480px"
+          aspectRatio="16:9"
+          width={1024}
+          height={576}
+          alt="Thumbnail"
+          loading="eager"
+          class="w-full"
+        />
+      )
+    }
+  </div>
+
+  <Container>
+    <div class="max-w-screen-md mx-auto">
+      <article set:html={content}
+        class="mx-auto my-3 prose prose-base dark:prose-invert prose-a:text-blue-600">
+        <!-- <Content /> -->
+
+        
+      </article>
+
+      <!-- <div class="flex justify-center mt-7 mb-7">
+        <a
+          href="/"
+          class="px-5 py-3 text-sm text-blue-600 transition rounded-md dark:text-blue-500 bg-blue-50 hover:bg-blue-100">
+          ← View all posts
+        </a>
+      </div>
+      {author && <Authorcard author={author} />} -->
+    </div>
+    <!-- <article class="max-w-screen-md mx-auto">
+      <div
+        class="mx-auto my-3 prose prose-base dark:prose-invert prose-a:text-blue-600">
+        <Content />
+
+        <div class="flex flex-wrap items-center w-full gap-3 md:w-auto">
+          {
+            post.data.tags.map((tag) => (
+              <span class="text-sm text-gray-500">#{tag}</span>
+            ))
+          }
+        </div>
+      </div>
+
+      <div class="flex justify-center mt-7 mb-7">
+        <a
+          href="/"
+          class="px-5 py-3 text-sm text-blue-600 transition rounded-md dark:text-blue-500 bg-blue-50 hover:bg-blue-100">
+          ← View all posts
+        </a>
+      </div>
+      {author && <Authorcard author={author} />}
+    </article> -->
+  </Container>
+</Layout>
